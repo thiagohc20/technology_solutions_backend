@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from 'src/app/app.module';
+import { AppModule } from './app/app.module';
 import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 import { ConfigService } from '@nestjs/config';
@@ -10,20 +10,17 @@ async function bootstrap() {
   app.use(cookieParser());
 
   app.setGlobalPrefix('api'); // Prefixo para todas as rotas
-
-  console.log(configService.get<string>('FRONT_END'));
   app.enableCors({
-    origin: 'http://localhost:4200',
+    origin: configService.get<string>('FRONT_URL'),
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
 
-  // Configurar o ValidationPipe globalmente
   app.useGlobalPipes(
     new ValidationPipe({
-      transform: true, // Permite a transformação dos dados de entrada
-      whitelist: true, // Remove propriedades não definidas no DTO
-      forbidNonWhitelisted: true, // Lança erro se propriedades não definidas forem enviadas
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
     }),
   );
 
