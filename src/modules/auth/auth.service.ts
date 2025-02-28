@@ -28,7 +28,7 @@ export class AuthService {
   async signIn(cpf: string, password: string): Promise<any> {
     const user = await this.userService.findByCpf(cpf);
 
-    if (!password) {
+    if (!password || !user?.password) {
       throw new UnauthorizedException('Você não tem acesso a aplicação');
     }
 

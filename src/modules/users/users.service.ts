@@ -84,7 +84,7 @@ export class UserService {
     }
   }
 
-  async findByCpf(cpf: string): Promise<any> {
+  async findByCpf(cpf: string): Promise<User | null> {
     const user = await this.userRepository.findOne({
       where: { cpf },
       relations: ['profile'],
