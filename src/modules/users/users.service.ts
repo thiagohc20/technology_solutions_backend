@@ -5,23 +5,17 @@ import {
   HttpException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, QueryFailedError, In } from 'typeorm';
+import { Repository } from 'typeorm';
 import { UserDto } from './dtos/create-user.dto';
-import { PasswordTransferDto } from './dtos/password-transfer.dto';
+
 import { UpdateUserDto } from './dtos/update-user.dto';
 import * as bcrypt from 'bcrypt';
 import { instanceToPlain } from 'class-transformer';
-/* interface */
-import type { UserById } from './interfaces/User';
-/* paginacao */
-import { PaginationDto } from './dtos/pagination.dto';
-import { PaginationResponseDto } from './dtos/pagination-response.dto';
 /* entities */
 import { User } from './users.entity';
 import { Profile } from '../profiles/entity/profile.entity';
 /* services */
 import { ProfilesService } from '../profiles/profiles.service';
-import { classToPlain } from 'class-transformer';
 
 @Injectable()
 export class UserService {
@@ -67,10 +61,6 @@ export class UserService {
       }
 
       // const timestamp = { created_at: new Date(), updated_at: new Date() };
-
-      if (user.password) {
-        user.password = bcrypt.hashSync(user.password, bcrypt.genSaltSync(10));
-      }
 
       const existingProfile = await this.profileRepository.findOne({
         where: { id: 3 },
@@ -139,8 +129,12 @@ export class UserService {
 
     // // const timestamp = { updated_at: new Date() };
 
-    if (user.email) userExists.email = user.email;
-    if (user.name) userExists.name = user.name;
+    if (!userExists.password) {
+      userExists.password = bcrypt.hashSync(
+        user.password,
+        bcrypt.genSaltSync(10),
+      );
+    }
 
     await this.userRepository.save({ ...userExists });
 

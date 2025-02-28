@@ -52,7 +52,8 @@ export class UserController {
   async update(
     @Param('id') id: string,
     @Body() user: UpdateUserDto,
-  ): Promise<{ message: string }> {
+    @Request() req,
+  ): Promise<any> {
     return this.userService.update(Number(id), user);
   }
 
