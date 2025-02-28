@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { UserService } from 'src/modules/users/users.service';
 import { compareSync } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { User } from '../users/users.entity';
 
 interface GenerateTokensOptions {
   accessTokenExp?: number;
@@ -24,19 +25,24 @@ export class AuthService {
     )!;
   }
 
-  async signIn(email: string, password: string): Promise<any> {
-    // const user = await this.userService.findByEmail(email);
-    // if (!user || !compareSync(password, user.password)) {
-    //   throw new UnauthorizedException('Credenciais inválidas');
-    // }
-    // return this.generateTokens(user);
+  async signIn(cpf: string, password: string): Promise<any> {
+    const user = await this.userService.findByCpf(cpf);
+
+    if (!password) {
+      throw new UnauthorizedException('Você não tem acesso a aplicação');
+    }
+
+    if (!user || !compareSync(password, user.password)) {
+      throw new UnauthorizedException('Credenciais inválidas');
+    }
+    return this.generateTokens(user);
   }
 
-  private generateTokens(user: any, options?: GenerateTokensOptions) {
+  private generateTokens(user: User, options?: GenerateTokensOptions) {
     const payload = {
       sub: user.id,
       email: user.email,
-      profiles: user.profiles,
+      profile: user.profile,
     };
     const refreshTokenSecret =
       this.configService.get<string>('JWT_REFRESH_SECRET');
@@ -68,7 +74,7 @@ export class AuthService {
     const payload = {
       sub: refreshPayload.sub,
       email: refreshPayload.email,
-      profiles: refreshPayload.profiles,
+      profile: refreshPayload.profile,
     };
 
     const newAccessToken = this.jwtService.sign(payload);

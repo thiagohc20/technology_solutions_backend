@@ -36,6 +36,7 @@ export class ProfilesService {
   async findAll(): Promise<Profile[]> {
     return await this.profileRepository.find();
   }
+
   // async create(profile: ProfilesDto): Promise<{ message: string }> {
   //   const timestamp = { created_at: new Date(), updated_at: new Date() };
   //   profile.id = uuidv4();

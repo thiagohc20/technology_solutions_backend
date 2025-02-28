@@ -13,7 +13,7 @@ export class AuthServiceTsController {
     @Body() auth: AuthDto,
     @Res({ passthrough: true }) res: Response,
   ): Promise<AuthResponseDto> {
-    const authReturn = await this.authService.signIn(auth.email, auth.password);
+    const authReturn = await this.authService.signIn(auth.cpf, auth.password);
     res.cookie('refresh_token', authReturn.refreshToken);
     return { token: authReturn.accessToken, expiresIn: authReturn.expiresIn };
   }

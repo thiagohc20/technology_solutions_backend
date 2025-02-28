@@ -1,19 +1,16 @@
-import { IsEmail, IsJWT, IsString } from 'class-validator';
+import { IsJWT, IsString, IsNotEmpty } from 'class-validator';
 
 export class AuthDto {
-	@IsEmail()
-	email: string;
+  @IsString({ message: 'Nome deve ser um texto' })
+  @IsNotEmpty({ message: 'Nome é obrigatório' })
+  cpf: string;
 
-	@IsString()
-	password: string;
-}
-
-export class IdigitalAuthDto {
-	@IsJWT()
-	idToken: string;
+  @IsString()
+  @IsNotEmpty({ message: 'A senha é obrigatória' })
+  password: string;
 }
 
 export class AuthResponseDto {
-	token: string;
-	expiresIn: number;
+  token: string;
+  expiresIn: number;
 }
