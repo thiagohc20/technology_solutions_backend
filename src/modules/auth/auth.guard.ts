@@ -97,21 +97,21 @@ export class AuthGuard implements CanActivate {
       return true;
     }
 
-    const userProfileId = user.profiles.map((profile) => profile.id);
+    // const userProfileId = user.profiles.map((profile) => profile.id);
 
-    const profiles = await this.profileRepository.find({
-      where: { id: In(userProfileId) },
-      relations: ['users'],
-    });
+    // const profiles = await this.profileRepository.find({
+    //   where: { id: In(userProfileId) },
+    //   relations: ['users'],
+    // });
 
-    const userProfile = profiles.map((profile) => profile);
+    // const userProfile = profiles.map((profile) => profile);
 
-    if (
-      !user ||
-      !userProfile.some(({ id }) => requiredPermissions.includes(id))
-    ) {
-      throw new ForbiddenException('Acesso negado');
-    }
+    // if (
+    //   !user ||
+    //   !userProfile.some(({ id }) => requiredPermissions.includes(id))
+    // ) {
+    //   throw new ForbiddenException('Acesso negado');
+    // }
 
     return true;
   }

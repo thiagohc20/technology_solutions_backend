@@ -36,47 +36,53 @@ export class ProfilesService {
   async findAll(): Promise<Profile[]> {
     return await this.profileRepository.find();
   }
-  async create(profile: ProfilesDto): Promise<{ message: string }> {
-    const timestamp = { created_at: new Date(), updated_at: new Date() };
-    profile.id = uuidv4();
-    const newProfile = this.profileRepository.create({
-      ...profile,
-      ...timestamp,
-    });
-    await this.profileRepository.save(newProfile);
-    return { message: 'Perfil criado com sucesso!' };
-  }
+  // async create(profile: ProfilesDto): Promise<{ message: string }> {
+  //   const timestamp = { created_at: new Date(), updated_at: new Date() };
+  //   profile.id = uuidv4();
+  //   const newProfile = this.profileRepository.create({
+  //     ...profile,
+  //     ...timestamp,
+  //   });
+  //   await this.profileRepository.save(newProfile);
+  //   return { message: 'Perfil criado com sucesso!' };
+  // }
 
   async updateProfilesToUser(
-    userId: string,
-    profiles: string[],
+    userId: number,
+    profileId: number,
   ): Promise<{ message: string }> {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['profile'],
+    });
+
     if (!user) {
       throw new NotFoundException('Usuário não encontrado');
     }
 
-    const existingProfiles = await this.profileRepository.findByIds(profiles);
+    const existingProfile = await this.profileRepository.findOne({
+      where: { id: profileId },
+    });
 
-    if (existingProfiles.length !== profiles.length) {
+    if (!existingProfile) {
       throw new NotFoundException('Perfil não encontrado');
     }
 
-    user.profiles = existingProfiles;
+    user.profile = existingProfile;
     await this.userRepository.save(user);
 
     return { message: 'Perfis atualizados com sucesso!' };
   }
 
-  async update(id: string, profile: ProfilesDto): Promise<{ message: string }> {
-    const profileExists = await this.profileRepository.findOne({
-      where: { id },
-    });
-    if (!profileExists) {
-      throw new NotFoundException('Perfil não encontrado');
-    }
-    const uptadeAt = { updatedAt: new Date() };
-    await this.profileRepository.update(id, { ...profile, ...uptadeAt });
-    return { message: 'Perfil atualizado com sucesso!' };
-  }
+  // async update(id: string, profile: ProfilesDto): Promise<{ message: string }> {
+  //   const profileExists = await this.profileRepository.findOne({
+  //     where: { id },
+  //   });
+  //   if (!profileExists) {
+  //     throw new NotFoundException('Perfil não encontrado');
+  //   }
+  //   const uptadeAt = { updatedAt: new Date() };
+  //   await this.profileRepository.update(id, { ...profile, ...uptadeAt });
+  //   return { message: 'Perfil atualizado com sucesso!' };
+  // }
 }

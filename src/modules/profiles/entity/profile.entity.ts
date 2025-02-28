@@ -3,25 +3,18 @@ import {
   Column,
   PrimaryGeneratedColumn,
   BeforeInsert,
+  OneToOne,
   BeforeUpdate,
   OneToMany,
   ManyToMany,
+  PrimaryColumn,
 } from 'typeorm';
 import { User } from '../../users/users.entity';
 @Entity('profiles')
 export class Profile {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @Column()
   name: string;
-
-  @ManyToMany(() => User, (user) => user.profiles)
-  users: User[];
-
-  // @Column()
-  // created_at: Date;
-
-  // @Column()
-  // updated_at: Date;
 }

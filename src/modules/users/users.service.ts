@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  HttpException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, QueryFailedError, In } from 'typeorm';
@@ -9,7 +10,6 @@ import { UserDto } from './dtos/create-user.dto';
 import { PasswordTransferDto } from './dtos/password-transfer.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import * as bcrypt from 'bcrypt';
-import { v4 as uuidv4 } from 'uuid';
 import { instanceToPlain } from 'class-transformer';
 /* interface */
 import type { UserById } from './interfaces/User';
@@ -21,6 +21,7 @@ import { User } from './users.entity';
 import { Profile } from '../profiles/entity/profile.entity';
 /* services */
 import { ProfilesService } from '../profiles/profiles.service';
+import { classToPlain } from 'class-transformer';
 
 @Injectable()
 export class UserService {
@@ -34,54 +35,50 @@ export class UserService {
     private profileRepository: Repository<Profile>,
   ) {}
 
-  async paginate(
-    paginationDto: PaginationDto,
-  ): Promise<PaginationResponseDto<User>> {
-    const { page, limit } = paginationDto;
-
-    const queryBuilder = this.userRepository.createQueryBuilder('user');
-
-    queryBuilder.select([
-      'user.id',
-      'user.name',
-      'user.email',
-      'user.cpf',
-      'user.updated_at',
-    ]);
-
-    queryBuilder.skip((page! - 1) * limit!).take(limit);
-
-    const [data, total] = await queryBuilder.getManyAndCount();
-
-    return {
-      data,
-      total,
-      page,
-      limit,
-    };
+  async findAll(): Promise<any> {
+    const users = await this.userRepository.find();
+    return instanceToPlain(users);
   }
 
   async create(user: UserDto): Promise<{ message: string }> {
     try {
-      const timestamp = { created_at: new Date(), updated_at: new Date() };
+      const hasUserCpf = await this.userRepository.findOne({
+        where: {
+          cpf: user.cpf,
+        },
+      });
 
-      user.id = uuidv4();
+      if (hasUserCpf) {
+        throw new ConflictException(
+          'Não é possível criar um usuário com o mesmo CPF',
+        );
+      }
 
-      const password = bcrypt.hashSync(
-        user.cpf.substring(0, 6),
-        bcrypt.genSaltSync(Math.floor(Math.random() * 20)),
-      );
+      const hasUserEmail = await this.userRepository.findOne({
+        where: {
+          email: user.email,
+        },
+      });
 
-      user.password = password;
+      if (hasUserEmail) {
+        throw new ConflictException(
+          'Não é possível criar um usuário com o mesmo e-mail',
+        );
+      }
 
-      const existingProfiles = await this.profileRepository.findByIds(
-        user.profiles,
-      );
+      // const timestamp = { created_at: new Date(), updated_at: new Date() };
+
+      if (user.password) {
+        user.password = bcrypt.hashSync(user.password, bcrypt.genSaltSync(10));
+      }
+
+      const existingProfile = await this.profileRepository.findOne({
+        where: { id: 3 },
+      });
 
       const newUser = this.userRepository.create({
         ...user,
-        ...timestamp,
-        profiles: existingProfiles,
+        profile: existingProfile!,
       });
 
       await this.userRepository.save(newUser);
@@ -97,20 +94,20 @@ export class UserService {
     }
   }
 
-  async findByEmail(email: string): Promise<any> {
+  async findByCpf(cpf: string): Promise<any> {
     const user = await this.userRepository.findOne({
-      where: { email },
+      where: { cpf },
       relations: ['profiles'],
     });
 
     return user;
   }
 
-  async findOne(id: string): Promise<any> {
+  async findOne(id: number): Promise<any> {
     //1. Buscar o usuário
     const user = await this.userRepository.findOne({
       where: { id },
-      relations: ['profiles'],
+      relations: ['profile'],
     });
     if (!user) {
       throw new NotFoundException('Não foi possível encontrar o usuário');
@@ -121,7 +118,7 @@ export class UserService {
     };
   }
 
-  async delete(id: string): Promise<{ message: string }> {
+  async delete(id: number): Promise<{ message: string }> {
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {
       throw new NotFoundException('Não foi possível encontrar o usuário');
@@ -131,26 +128,23 @@ export class UserService {
     return { message: 'Usuário removido com sucesso' };
   }
 
-  async update(id: string, user: UpdateUserDto): Promise<{ message: string }> {
-    const userExists = await this.userRepository.findOne({ where: { id } });
+  async update(id: number, user: UpdateUserDto): Promise<{ message: string }> {
+    const userExists = await this.userRepository.findOne({
+      where: { id },
+      relations: ['profile'],
+    });
     if (!userExists) {
       throw new NotFoundException('Não foi possível encontrar o usuário');
     }
 
-    const profiles = await this.profileRepository.findByIds(user.roles);
-
-    if (!profiles) {
-      throw new NotFoundException('Perfil não encontrado');
-    }
-
-    const timestamp = { updated_at: new Date() };
+    // // const timestamp = { updated_at: new Date() };
 
     if (user.email) userExists.email = user.email;
     if (user.name) userExists.name = user.name;
 
-    await this.userRepository.save({ ...userExists, ...timestamp });
+    await this.userRepository.save({ ...userExists });
 
-    await this.profilesService.updateProfilesToUser(id, user.roles);
+    await this.profilesService.updateProfilesToUser(id, user.role);
 
     return { message: 'Usuário atualizado com sucesso' };
   }

@@ -25,13 +25,11 @@ export class AuthService {
   }
 
   async signIn(email: string, password: string): Promise<any> {
-    const user = await this.userService.findByEmail(email);
-
-    if (!user || !compareSync(password, user.password)) {
-      throw new UnauthorizedException('Credenciais inválidas');
-    }
-
-    return this.generateTokens(user);
+    // const user = await this.userService.findByEmail(email);
+    // if (!user || !compareSync(password, user.password)) {
+    //   throw new UnauthorizedException('Credenciais inválidas');
+    // }
+    // return this.generateTokens(user);
   }
 
   private generateTokens(user: any, options?: GenerateTokensOptions) {
