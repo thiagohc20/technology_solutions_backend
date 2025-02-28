@@ -9,9 +9,8 @@ import {
   ManyToMany,
   PrimaryColumn,
 } from 'typeorm';
-import { User } from '../../users/users.entity';
 @Entity('profiles')
-export class Profile {
+export class ProfileEntity {
   @PrimaryGeneratedColumn()
   id: number;
 

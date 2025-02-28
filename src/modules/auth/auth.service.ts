@@ -3,9 +3,10 @@ import { AuthResponseDto } from '../auth/dtos/auth.dto';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
 import { UserService } from 'src/modules/users/users.service';
+import { EmployeesService } from '../employees/employees.service';
 import { compareSync } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { User } from '../users/users.entity';
+import { UserEntity } from '../users/users.entity';
 
 interface GenerateTokensOptions {
   accessTokenExp?: number;
@@ -18,6 +19,7 @@ export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
+    private readonly employeeService: EmployeesService,
     private readonly configService: ConfigService,
   ) {
     this.jwtExpirationTimeInSeconds = +this.configService.get<number>(
@@ -26,40 +28,41 @@ export class AuthService {
   }
 
   async signIn(cpf: string, password: string): Promise<any> {
-    const user = await this.userService.findByCpf(cpf);
+    const user = await this.employeeService.findOneByCpf(cpf);
 
-    if (!password || !user?.password) {
-      throw new UnauthorizedException('Você não tem acesso a aplicação');
-    }
+    // if (!password || !user?.password) {
+    //   throw new UnauthorizedException('Você não tem acesso a aplicação');
+    // }
 
-    if (!user || !compareSync(password, user.password)) {
-      throw new UnauthorizedException('Credenciais inválidas');
-    }
-    return this.generateTokens(user);
+    // if (!user || !compareSync(password, user.password)) {
+    //   throw new UnauthorizedException('Credenciais inválidas');
+    // }
+    // return this.generateTokens(user);
+    console.log(user);
   }
 
-  private generateTokens(user: User, options?: GenerateTokensOptions) {
-    const payload = {
-      sub: user.id,
-      email: user.email,
-      profile: user.profile,
-    };
-    const refreshTokenSecret =
-      this.configService.get<string>('JWT_REFRESH_SECRET');
-    const accessTokenExpiresIn = this.jwtExpirationTimeInSeconds;
-    const refreshTokenExpiresIn = this.configService.get<number>(
-      'JWT_REFRESH_EXPIRATION_TIME',
-    );
+  // private generateTokens(user: UserEntity, options?: GenerateTokensOptions) {
+  //   const payload = {
+  //     sub: user.id,
+  //     email: user.email,
+  //     profile: user.profile,
+  //   };
+  //   const refreshTokenSecret =
+  //     this.configService.get<string>('JWT_REFRESH_SECRET');
+  //   const accessTokenExpiresIn = this.jwtExpirationTimeInSeconds;
+  //   const refreshTokenExpiresIn = this.configService.get<number>(
+  //     'JWT_REFRESH_EXPIRATION_TIME',
+  //   );
 
-    return {
-      accessToken: this.jwtService.sign(payload),
-      refreshToken: this.jwtService.sign(payload, {
-        secret: refreshTokenSecret,
-        expiresIn: refreshTokenExpiresIn,
-      }),
-      expiresIn: accessTokenExpiresIn,
-    };
-  }
+  //   return {
+  //     accessToken: this.jwtService.sign(payload),
+  //     refreshToken: this.jwtService.sign(payload, {
+  //       secret: refreshTokenSecret,
+  //       expiresIn: refreshTokenExpiresIn,
+  //     }),
+  //     expiresIn: accessTokenExpiresIn,
+  //   };
+  // }
 
   async refreshToken(refreshToken: string) {
     let refreshPayload: any;

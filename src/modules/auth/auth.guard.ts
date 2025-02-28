@@ -11,8 +11,8 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Request } from 'express';
-import { User } from '../users/users.entity';
-import { Profile } from '../profiles/entity/profile.entity';
+import { UserEntity } from '../users/users.entity';
+import { ProfileEntity } from '../profiles/entity/profile.entity';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -20,8 +20,8 @@ export class AuthGuard implements CanActivate {
   private jwtRefreshSecret: string;
 
   constructor(
-    @InjectRepository(Profile)
-    private profileRepository: Repository<Profile>,
+    @InjectRepository(ProfileEntity)
+    private profileRepository: Repository<ProfileEntity>,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly reflector: Reflector,
@@ -61,8 +61,6 @@ export class AuthGuard implements CanActivate {
           throw new UnauthorizedException('Refresh Token não encontrado');
         }
 
-        console.log('refreshToken', refreshToken);
-
         try {
           const refreshPayload = await this.jwtService.verifyAsync(
             refreshToken,
@@ -87,7 +85,7 @@ export class AuthGuard implements CanActivate {
     }
 
     request.user = payload;
-    const user: User = request.user;
+    const user: UserEntity = request.user;
 
     const requiredPermissions = this.reflector.get<string[]>(
       'roles',
@@ -97,18 +95,18 @@ export class AuthGuard implements CanActivate {
       return true;
     }
 
-    // const userProfileId = user.profiles.map((profile) => profile.id);
+    const userProfileId = user.profile.id;
 
-    // const profiles = await this.profileRepository.find({
-    //   where: { id: In(userProfileId) },
-    //   relations: ['users'],
-    // });
+    const profile = await this.profileRepository.find({
+      where: { id: userProfileId },
+      relations: ['users'],
+    });
 
-    // const userProfile = profiles.map((profile) => profile);
+    console.log(profile);
 
     // if (
     //   !user ||
-    //   !userProfile.some(({ id }) => requiredPermissions.includes(id))
+    //   !requiredPermissions.includes(profile))
     // ) {
     //   throw new ForbiddenException('Acesso negado');
     // }

@@ -1,10 +1,25 @@
-import { IsNotEmpty, IsString, IsNumber } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsOptional,
+  IsEmail,
+  MaxLength,
+  Length,
+  IsNumber,
+} from 'class-validator';
 
 export class UpdateUserDto {
-  @IsString({ message: 'Email deve ser um texto' })
-  @IsNotEmpty({ message: 'Email é obrigatório' })
-  password: string;
+  @IsNumber({}, { message: 'O id deve ser um número' })
+  userId: number;
 
-  @IsNumber()
+  @IsNumber({}, { message: 'O id deve ser um número' })
+  profileId: number;
+
+  @IsString({ message: 'ID deve ser uma string' })
+  @IsOptional()
+  password?: string;
+
+  @IsNumber({}, { message: 'O perfil deve ser um número' })
+  @IsNotEmpty({ message: 'O perfil é obrigatório' })
   role: number;
 }

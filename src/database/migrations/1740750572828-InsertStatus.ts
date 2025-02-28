@@ -3,9 +3,9 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
 export class InsertStatus1740750572828 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
-             INSERT INTO status (name) values ('Finalizado')
-             INSERT INTO status (name) values ('Em Aberto')
-             INSERT INTO status (name) values ('Vencido')
+             INSERT INTO status (name, created_at) values ('Finalizado', GETDATE())
+             INSERT INTO status (name, created_at) values ('Em Aberto', GETDATE())
+             INSERT INTO status (name, created_at) values ('Vencido', GETDATE())
          `);
   }
 

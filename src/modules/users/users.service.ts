@@ -6,140 +6,89 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UserDto } from './dtos/create-user.dto';
 
+import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import * as bcrypt from 'bcrypt';
 import { instanceToPlain } from 'class-transformer';
 /* entities */
-import { User } from './users.entity';
-import { Profile } from '../profiles/entity/profile.entity';
+import { UserEntity } from './users.entity';
+import { ProfileEntity } from '../profiles/entity/profile.entity';
+import { EmployeeEntity } from './../employees/entity/employee.entity';
 /* services */
 import { ProfilesService } from '../profiles/profiles.service';
 
 @Injectable()
 export class UserService {
   constructor(
-    private readonly profilesService: ProfilesService,
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
-    @InjectRepository(Profile)
-    private profilesRepository: Repository<Profile>,
-    @InjectRepository(Profile)
-    private profileRepository: Repository<Profile>,
+    @InjectRepository(UserEntity)
+    private userRepository: Repository<UserEntity>,
+    @InjectRepository(EmployeeEntity)
+    private employeeRepository: Repository<EmployeeEntity>,
+    @InjectRepository(ProfileEntity)
+    private profilesRepository: Repository<ProfileEntity>,
   ) {}
 
-  async findAll(): Promise<any> {
-    const users = await this.userRepository.find();
-    return instanceToPlain(users);
-  }
-
-  async create(user: UserDto): Promise<{ message: string }> {
-    try {
-      const hasUserCpf = await this.userRepository.findOne({
-        where: {
-          cpf: user.cpf,
-        },
-      });
-
-      if (hasUserCpf) {
-        throw new ConflictException(
-          'Não é possível criar um usuário com o mesmo CPF',
-        );
-      }
-
-      const hasUserEmail = await this.userRepository.findOne({
-        where: {
-          email: user.email,
-        },
-      });
-
-      if (hasUserEmail) {
-        throw new ConflictException(
-          'Não é possível criar um usuário com o mesmo e-mail',
-        );
-      }
-
-      // const timestamp = { created_at: new Date(), updated_at: new Date() };
-
-      const existingProfile = await this.profileRepository.findOne({
-        where: { id: 3 },
-      });
-
-      const newUser = this.userRepository.create({
-        ...user,
-        profile: existingProfile!,
-      });
-
-      await this.userRepository.save(newUser);
-
-      return { message: 'Usuário criado com sucesso' };
-    } catch (error: any) {
-      if (error.number === 2627) {
-        throw new ConflictException(
-          'Não é possível criar um usuário com o mesmo CPF ou e-mail',
-        );
-      }
-      throw error;
-    }
-  }
-
-  async findByCpf(cpf: string): Promise<User | null> {
-    const user = await this.userRepository.findOne({
-      where: { cpf },
-      relations: ['profile'],
+  async create(user: CreateUserDto): Promise<{ message: string }> {
+    const hasEmployee = await this.employeeRepository.findOne({
+      where: { id: user.userId },
     });
 
-    return user;
-  }
+    if (!hasEmployee) {
+      throw new HttpException('Colaborador não encontrado', 500);
+    }
 
-  async findOne(id: number): Promise<any> {
-    //1. Buscar o usuário
-    const user = await this.userRepository.findOne({
-      where: { id },
-      relations: ['profile'],
+    const hasProfile = await this.profilesRepository.findOne({
+      where: { id: user.profileId },
     });
-    if (!user) {
-      throw new NotFoundException('Não foi possível encontrar o usuário');
+
+    if (!hasProfile) {
+      throw new HttpException('Perfil não encontrado', 500);
     }
 
-    return {
-      ...instanceToPlain(user),
-    };
-  }
-
-  async delete(id: number): Promise<{ message: string }> {
-    const user = await this.userRepository.findOne({ where: { id } });
-    if (!user) {
-      throw new NotFoundException('Não foi possível encontrar o usuário');
-    }
-    await this.userRepository.delete(id);
-
-    return { message: 'Usuário removido com sucesso' };
-  }
-
-  async update(id: number, user: UpdateUserDto): Promise<{ message: string }> {
-    const userExists = await this.userRepository.findOne({
-      where: { id },
-      relations: ['profile'],
+    const newUser = this.userRepository.create({
+      employee: hasEmployee,
+      created_at: new Date(),
+      profile: hasProfile,
     });
-    if (!userExists) {
-      throw new NotFoundException('Não foi possível encontrar o usuário');
+
+    await this.userRepository.save(newUser);
+
+    return { message: 'Usuário criado com sucesso!' };
+  }
+
+  async update(user: UpdateUserDto): Promise<{ message: string }> {
+    const password = bcrypt.hashSync(
+      user.password,
+      bcrypt.genSaltSync(Math.floor(Math.random() * 20)),
+    );
+
+    user.password = password;
+
+    const hasEmployee = await this.employeeRepository.findOne({
+      where: { id: user.userId },
+    });
+
+    if (!hasEmployee) {
+      throw new HttpException('Colaborador não encontrado', 500);
     }
 
-    // // const timestamp = { updated_at: new Date() };
+    const existingProfile = await this.profilesRepository.findOne({
+      where: { id: user.profileId },
+    });
 
-    if (!userExists.password) {
-      userExists.password = bcrypt.hashSync(
-        user.password,
-        bcrypt.genSaltSync(10),
-      );
+    if (!existingProfile) {
+      throw new HttpException('Perfil não encontrado', 500);
     }
 
-    await this.userRepository.save({ ...userExists });
+    const newUser = this.userRepository.create({
+      employee: hasEmployee,
+      created_at: new Date(),
+      profile: existingProfile,
+    });
 
-    await this.profilesService.updateProfilesToUser(id, user.role);
+    await this.userRepository.save(newUser);
 
-    return { message: 'Usuário atualizado com sucesso' };
+    return { message: 'Usuário atualizado com sucesso!' };
   }
 }

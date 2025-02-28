@@ -3,6 +3,7 @@ import {
   PrimaryGeneratedColumn,
   Column,
   BeforeInsert,
+  CreateDateColumn,
   ManyToMany,
   JoinTable,
   OneToMany,
@@ -10,53 +11,25 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Exclude, Expose } from 'class-transformer';
-import { Profile } from '../profiles/entity/profile.entity';
+import { ProfileEntity } from '../profiles/entity/profile.entity';
+import { EmployeeEntity } from '../employees/entity/employee.entity';
 @Entity('users')
-export class User {
+export class UserEntity {
   @PrimaryGeneratedColumn()
   id: number;
-
-  @Column()
-  @Expose()
-  name: string;
-
-  @Column({ unique: true })
-  @Expose()
-  email: string;
-
-  @Column({ unique: true })
-  @Expose()
-  cpf: string;
-
-  @Column()
-  @Expose()
-  telephone: string;
-
-  @Column()
-  @Expose()
-  zipcode: string;
-
-  @Column()
-  @Expose()
-  uf: string;
-
-  @Column()
-  @Expose()
-  neighborhood: string;
-
-  @Column()
-  @Expose()
-  publicPlace: string;
-
-  @Column()
-  @Expose()
-  locality: string;
 
   @Exclude()
   @Column({ type: 'nvarchar', unique: true })
   password?: string;
 
-  @OneToOne(() => Profile)
-  @JoinColumn()
-  profile: Profile;
+  @OneToOne(() => ProfileEntity)
+  @JoinColumn({ name: 'profile_id' })
+  profile: ProfileEntity;
+
+  @OneToOne(() => EmployeeEntity)
+  @JoinColumn({ name: 'employee_id' })
+  employee: EmployeeEntity;
+
+  @CreateDateColumn() // Este campo será automaticamente preenchido com a data e hora de criação
+  created_at: Date;
 }

@@ -5,18 +5,17 @@ export class CreateStatusInvitationsTable1740750543085
 {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
+            IF NOT EXISTS (SELECT * FROM sysobjects WHERE name = 'status_invitation' AND xtype = 'U')
+            BEGIN
             CREATE TABLE status_invitation (
                 id INT IDENTITY(1,1) PRIMARY KEY,
                 email VARCHAR(255) NOT NULL,
-                statusId INT NOT NULL,
-                createdAt DATETIME NOT NULL,
-                createdFor INT NOT NULL,
-                updatedAt DATETIME,
-                updatedFor INT,
-                FOREIGN KEY (createdFor) REFERENCES users(id),         
-                FOREIGN KEY (updatedFor) REFERENCES users(id),         
-                FOREIGN KEY (statusId) REFERENCES status(id)
+                status_id INT NOT NULL,
+                created_at DATETIME NOT NULL,
+                updated_at DATETIME,       
+                FOREIGN KEY (status_id) REFERENCES status(id)
             )
+            END
         `);
   }
 
