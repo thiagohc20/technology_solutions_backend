@@ -22,7 +22,7 @@ import type { UserById } from './interfaces/User';
 import { AuthGuard } from '../auth/auth.guard';
 
 @Controller('users')
-// @UseGuards(AuthGuard)
+@UseGuards(AuthGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
