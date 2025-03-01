@@ -22,9 +22,6 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
-  // const dataSource = app.get(DataSource);
-  // await dataSource.initialize();
-  // await dataSource.runMigrations();
 
   await app.listen(3000);
 }

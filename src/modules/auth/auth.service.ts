@@ -14,22 +14,18 @@ interface GenerateTokensOptions {
 
 @Injectable()
 export class AuthService {
-  private jwtExpirationTimeInSeconds: number;
+  private jwtExpirationTimeInSeconds: string;
   constructor(
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
     private readonly employeeService: EmployeesService,
     private readonly configService: ConfigService,
-  ) {
-    this.jwtExpirationTimeInSeconds = +this.configService.get<number>(
-      'JWT_EXPIRATION_TIME',
-    )!;
-  }
+  ) {}
 
   async signIn(
     cpf: string,
     password: string,
-  ): Promise<{ accessToken: string; refreshToken: string; expiresIn: number }> {
+  ): Promise<{ accessToken: string; refreshToken: string; expiresIn: string }> {
     const user = await this.employeeService.findOneByCpf(cpf);
 
     if (!password || !user?.user.password) {
@@ -39,7 +35,7 @@ export class AuthService {
       throw new UnauthorizedException('Credenciais inválidas');
     }
     const token = this.generateTokens(user);
-    console.log(token);
+
     return token;
   }
 
@@ -55,10 +51,14 @@ export class AuthService {
     const refreshTokenSecret =
       this.configService.get<string>('JWT_REFRESH_SECRET');
     const accessTokenExpiresIn = this.jwtExpirationTimeInSeconds;
-    const refreshTokenExpiresIn = this.configService.get<number>(
+    const refreshTokenExpiresIn = this.configService.get<string>(
       'JWT_REFRESH_EXPIRATION_TIME',
     );
 
+    console.log(typeof this.configService.get<string>('JWT_EXPIRATION_TIME'));
+    console.log(
+      typeof this.configService.get<string>('JWT_REFRESH_EXPIRATION_TIME'),
+    );
     return {
       accessToken: this.jwtService.sign(payload),
       refreshToken: this.jwtService.sign(payload, {

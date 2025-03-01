@@ -5,12 +5,12 @@ import { ProfileEntity } from './entity/profile.entity';
 import { ProfilesDto } from './dtos/create-profile.dto';
 import { AuthGuard } from '../auth/auth.guard';
 @Controller('profiles')
-// @UseGuards(AuthGuard)
+@UseGuards(AuthGuard)
 export class ProfilesController {
   constructor(private readonly profilesService: ProfilesService) {}
 
-  // @Get()
-  // async findAll(): Promise<ProfileEntity[]> {
-  //   // return this.profilesService.findAll();
-  // }
+  @Get()
+  async findAll(): Promise<ProfileEntity[]> {
+    return this.profilesService.findAll();
+  }
 }

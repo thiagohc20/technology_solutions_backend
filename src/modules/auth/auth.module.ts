@@ -15,7 +15,9 @@ import { EmployeesService } from '../employees/employees.service';
       imports: [],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get('JWT_ACCESS_SECRET'),
-        signOptions: { expiresIn: '1d' },
+        signOptions: {
+          expiresIn: configService.get<string>('JWT_EXPIRATION_TIME')!,
+        },
       }),
       inject: [ConfigService],
     }),
