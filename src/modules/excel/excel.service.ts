@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import * as XLSX from 'xlsx';
 import { Response } from 'express';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -12,18 +12,21 @@ export class ExcelService {
     private employeesRepository: Repository<EmployeeEntity>,
   ) {}
   // Função para gerar o arquivo Excel
-  async generateExcel(res: Response, search: string) {
+  async generateExcel(res: Response, search: string | undefined) {
     const employees = await this.employeesRepository.find();
 
-    const employeesFiltered = employees.filter(
-      (item) =>
+    const employeesFiltered = employees.filter((item) => {
+      if (!search) return true;
+      return (
         item.name.toLocaleLowerCase().includes(search.toLocaleLowerCase()) ||
         item.cpf.toLocaleLowerCase().includes(search.toLocaleLowerCase()) ||
-        item.email.toLocaleLowerCase().includes(search.toLocaleLowerCase()) ||
-        search == undefined ||
-        search == '',
-    );
+        item.email.toLocaleLowerCase().includes(search.toLocaleLowerCase())
+      );
+    });
 
+    if (employeesFiltered.length == 0) {
+      throw new HttpException('Nada encontrado', 404);
+    }
     // Converte os dados em uma planilha
     const ws = XLSX.utils.json_to_sheet(employeesFiltered);
 

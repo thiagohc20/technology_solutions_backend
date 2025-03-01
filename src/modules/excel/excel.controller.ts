@@ -10,7 +10,6 @@ export class ExcelController {
 
   @Get('export')
   exportExcel(@Query('search') search: string, @Res() res: Response) {
-    console.log(search);
     return this.excelService.generateExcel(res, search);
   }
 }
