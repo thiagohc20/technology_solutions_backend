@@ -28,7 +28,7 @@ export class AuthService {
   ): Promise<{ accessToken: string; refreshToken: string; expiresIn: string }> {
     const user = await this.employeeService.findOneByCpf(cpf);
 
-    if (!password || !user?.user.password) {
+    if (!password || !user?.user.password || user.user.profile.id == 3) {
       throw new UnauthorizedException('Você não tem acesso a aplicação');
     }
     if (!user || !compareSync(password, user.user.password)) {

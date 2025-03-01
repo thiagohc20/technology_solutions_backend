@@ -18,4 +18,7 @@ export class ProfileEntity {
 
   @Column()
   name: string;
+
+  @OneToOne(() => UserEntity)
+  user: UserEntity;
 }
