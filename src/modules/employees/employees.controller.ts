@@ -6,13 +6,16 @@ import {
   Param,
   Put,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { EmployeesService } from './employees.service';
 import { CreateEmployeeDto } from './dtos/create-employee.dto';
 import { UpdateEmployeeDto } from './dtos/update-employee.dto';
 import { EmployeeEntity } from './entity/employee.entity';
+import { AuthGuard } from '../auth/auth.guard';
 
 @Controller('employees')
+@UseGuards(AuthGuard)
 export class EmployeesController {
   constructor(private readonly employeesService: EmployeesService) {}
 

@@ -5,6 +5,7 @@ import { EmployeeEntity } from './entity/employee.entity';
 import { CreateEmployeeDto } from './dtos/create-employee.dto';
 import { UpdateEmployeeDto } from './dtos/update-employee.dto';
 import { UserService } from '../users/users.service';
+import { instanceToPlain } from 'class-transformer';
 
 @Injectable()
 export class EmployeesService {
@@ -53,13 +54,34 @@ export class EmployeesService {
   }
 
   // Buscar todos os employees
-  async findAll(): Promise<EmployeeEntity[]> {
-    return await this.employeesRepository.find();
+  async findAll(): Promise<any> {
+    const employees = await this.employeesRepository.find();
+    return instanceToPlain(employees);
   }
 
   // Buscar um employee por ID
-  async findOne(id: number): Promise<EmployeeEntity | null> {
-    return await this.employeesRepository.findOne({ where: { id: id } });
+  async findOne(id: number): Promise<any | null> {
+    const employee = await this.employeesRepository.findOne({
+      where: { id: id },
+      relations: ['user.profile'],
+    });
+    if (!employee) {
+      throw new HttpException('Colaborador não encontrado', 404);
+    }
+
+    const {
+      user: { password, ...userWithoutPassword },
+      ...objWithoutPassword
+    } = employee;
+
+    const newObj = {
+      ...objWithoutPassword,
+      user: {
+        ...userWithoutPassword,
+      },
+    };
+
+    return newObj as any;
   }
 
   // Buscar um employee por CPF

@@ -28,40 +28,50 @@ export class EmployeeEntity {
 
   @Column()
   @Expose()
+  @Exclude()
   telephone: string;
 
   @Column()
   @Expose()
+  @Exclude()
   zipcode: string;
 
   @Column()
   @Expose()
+  @Exclude()
   uf: string;
 
   @Column()
   @Expose()
+  @Exclude()
   neighborhood: string;
 
   @Column({ name: 'public_place' })
   @Expose()
+  @Exclude()
   publicPlace: string;
 
   @Column()
   @Expose()
+  @Exclude()
   locality: string;
 
   @Column({ name: 'user_id' })
   @Expose()
+  @Exclude()
   userId: number;
 
   @CreateDateColumn() // Este campo será automaticamente preenchido com a data e hora de criação
+  @Exclude()
   created_at: Date;
 
   @OneToOne(() => UserEntity)
   @JoinColumn({ name: 'user_id' })
+  @Exclude()
   user: UserEntity;
 
   @Expose()
+  @Exclude()
   get profileDetails(): ProfileEntity {
     return this.user?.profile;
   }
