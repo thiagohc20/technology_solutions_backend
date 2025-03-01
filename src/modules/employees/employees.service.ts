@@ -86,10 +86,27 @@ export class EmployeesService {
 
   // Buscar um employee por CPF
   async findOneByCpf(cpf: string): Promise<EmployeeEntity | null> {
-    return await this.employeesRepository.findOne({
+    const employee = await this.employeesRepository.findOne({
       where: { cpf: cpf },
-      relations: ['user', 'user.profile'],
+      relations: ['user.profile'],
     });
+    if (!employee) {
+      throw new HttpException('Colaborador não encontrado', 404);
+    }
+
+    const {
+      user: { password, ...userWithoutPassword },
+      ...objWithoutPassword
+    } = employee;
+
+    const newObj = {
+      ...objWithoutPassword,
+      user: {
+        ...userWithoutPassword,
+      },
+    };
+
+    return newObj as any;
   }
 
   // Atualizar um employee

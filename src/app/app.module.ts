@@ -9,12 +9,14 @@ import { DatabaseModule } from 'src/database/database.module';
 import { ProfilesModule } from './../modules/profiles/profiles.module';
 import { UserModule } from './../modules/users/users.module';
 import { EmployeesModule } from 'src/modules/employees/employees.module';
+import { ExcelModule } from 'src/modules/excel/excel.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     AuthModule,
     DatabaseModule,
+    ExcelModule,
     UserModule,
     ProfilesModule,
     EmployeesModule,

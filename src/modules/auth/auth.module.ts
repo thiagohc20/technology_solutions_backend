@@ -8,6 +8,7 @@ import { UserModule } from 'src/modules/users/users.module';
 import { ProfileEntity } from 'src/modules/profiles/entity/profile.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EmployeesService } from '../employees/employees.service';
+import { ExcelService } from '../excel/excel.service';
 @Module({
   imports: [
     JwtModule.registerAsync({
