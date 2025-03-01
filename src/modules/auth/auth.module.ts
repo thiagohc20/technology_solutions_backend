@@ -9,6 +9,8 @@ import { ProfileEntity } from 'src/modules/profiles/entity/profile.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EmployeesService } from '../employees/employees.service';
 import { ExcelService } from '../excel/excel.service';
+import { StatusInvitationService } from '../status_invitation/status_invitation.service';
+import { StatusInvitationEntity } from '../status_invitation/entity/status_invitation.entity';
 @Module({
   imports: [
     JwtModule.registerAsync({
@@ -22,10 +24,14 @@ import { ExcelService } from '../excel/excel.service';
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([ProfileEntity, EmployeeEntity]),
+    TypeOrmModule.forFeature([
+      ProfileEntity,
+      EmployeeEntity,
+      StatusInvitationEntity,
+    ]),
     UserModule,
   ],
-  providers: [AuthService, EmployeesService],
+  providers: [AuthService, EmployeesService, StatusInvitationService],
   controllers: [AuthServiceTsController],
 })
 export class AuthModule {}

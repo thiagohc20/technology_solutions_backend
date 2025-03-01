@@ -45,6 +45,10 @@ export class CreateEmployeeDto {
   @IsNotEmpty({ message: 'Email é obrigatório' })
   email: string;
 
+  @IsString({ message: 'o token deve ser do tipo texto' })
+  @IsNotEmpty({ message: 'O token é obrigatório' })
+  token: string;
+
   @IsString({ message: 'CEP deve ser um texto' })
   @IsNotEmpty({ message: 'CEP é obrigatório' })
   @Length(8, 8, { message: 'CEP deve ter exatamente 8 caracteres' })
