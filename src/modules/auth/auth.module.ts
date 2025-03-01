@@ -21,9 +21,8 @@ import { EmployeesService } from '../employees/employees.service';
     }),
     TypeOrmModule.forFeature([ProfileEntity, EmployeeEntity]),
     UserModule,
-    EmployeesService,
   ],
-  providers: [AuthService],
+  providers: [AuthService, EmployeesService],
   controllers: [AuthServiceTsController],
 })
 export class AuthModule {}

@@ -17,10 +17,12 @@ import { ProfileEntity } from '../profiles/entity/profile.entity';
 import { EmployeeEntity } from './../employees/entity/employee.entity';
 /* services */
 import { ProfilesService } from '../profiles/profiles.service';
+import { ProfileChooseService } from '../profile_choose/profile_choose.service';
 
 @Injectable()
 export class UserService {
   constructor(
+    private readonly profileChooseService: ProfileChooseService,
     @InjectRepository(UserEntity)
     private userRepository: Repository<UserEntity>,
     @InjectRepository(EmployeeEntity)
@@ -29,9 +31,9 @@ export class UserService {
     private profilesRepository: Repository<ProfileEntity>,
   ) {}
 
-  async create(user: CreateUserDto): Promise<{ message: string }> {
+  async create(user: CreateUserDto): Promise<{ message: string; id: number }> {
     const hasEmployee = await this.employeeRepository.findOne({
-      where: { id: user.userId },
+      where: { id: user.employeeId },
     });
 
     if (!hasEmployee) {
@@ -52,21 +54,37 @@ export class UserService {
       profile: hasProfile,
     });
 
-    await this.userRepository.save(newUser);
+    const userCreated = await this.userRepository.save(newUser);
 
-    return { message: 'Usuário criado com sucesso!' };
+    return { message: 'Usuário criado com sucesso!', id: userCreated.id };
   }
 
-  async update(user: UpdateUserDto): Promise<{ message: string }> {
+  async update(
+    id: number,
+    user: ProfileEntity,
+    employee: UpdateUserDto,
+  ): Promise<{ message: string }> {
+    const canChangeProfile = await this.profileChooseService.canChangeProfile(
+      user,
+      employee.profileId,
+    );
+
+    if (!canChangeProfile) {
+      throw new HttpException(
+        'O usuário atual não tem permissão para alterar para esse perfil',
+        500,
+      );
+    }
+
     const password = bcrypt.hashSync(
-      user.password,
+      employee.password,
       bcrypt.genSaltSync(Math.floor(Math.random() * 20)),
     );
 
-    user.password = password;
+    employee.password = password;
 
     const hasEmployee = await this.employeeRepository.findOne({
-      where: { id: user.userId },
+      where: { id: employee.employeeId },
     });
 
     if (!hasEmployee) {
@@ -74,7 +92,7 @@ export class UserService {
     }
 
     const existingProfile = await this.profilesRepository.findOne({
-      where: { id: user.profileId },
+      where: { id: employee.profileId },
     });
 
     if (!existingProfile) {
@@ -83,11 +101,12 @@ export class UserService {
 
     const newUser = this.userRepository.create({
       employee: hasEmployee,
-      created_at: new Date(),
+      password: employee.password,
+      updated_at: new Date(),
       profile: existingProfile,
     });
 
-    await this.userRepository.save(newUser);
+    await this.userRepository.update(id, newUser);
 
     return { message: 'Usuário atualizado com sucesso!' };
   }

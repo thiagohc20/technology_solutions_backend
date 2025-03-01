@@ -32,4 +32,7 @@ export class UserEntity {
 
   @CreateDateColumn() // Este campo será automaticamente preenchido com a data e hora de criação
   created_at: Date;
+
+  @CreateDateColumn() // Este campo será automaticamente preenchido com a data e hora de criação
+  updated_at: Date;
 }

@@ -13,7 +13,7 @@ import { EmployeesModule } from 'src/modules/employees/employees.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    // AuthModule,
+    AuthModule,
     DatabaseModule,
     UserModule,
     ProfilesModule,

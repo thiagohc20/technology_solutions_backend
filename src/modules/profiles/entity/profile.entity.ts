@@ -9,6 +9,8 @@ import {
   ManyToMany,
   PrimaryColumn,
 } from 'typeorm';
+
+import { UserEntity } from 'src/modules/users/users.entity';
 @Entity('profiles')
 export class ProfileEntity {
   @PrimaryGeneratedColumn()

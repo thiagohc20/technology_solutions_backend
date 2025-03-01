@@ -7,16 +7,16 @@ import { Response } from 'express';
 export class AuthServiceTsController {
   constructor(private readonly authService: AuthService) {}
 
-  // @HttpCode(200)
-  // @Post('login')
-  // async signIn(
-  //   @Body() auth: AuthDto,
-  //   @Res({ passthrough: true }) res: Response,
-  // ): Promise<AuthResponseDto> {
-  //   const authReturn = await this.authService.signIn(auth.cpf, auth.password);
-  //   res.cookie('refresh_token', authReturn.refreshToken);
-  //   return { token: authReturn.accessToken, expiresIn: authReturn.expiresIn };
-  // }
+  @HttpCode(200)
+  @Post('login')
+  async signIn(
+    @Body() auth: AuthDto,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<any> {
+    const authReturn = await this.authService.signIn(auth.cpf, auth.password);
+    res.cookie('refresh_token', authReturn.refreshToken);
+    return { token: authReturn.accessToken, expiresIn: authReturn.expiresIn };
+  }
 
   @Post('refreshToken')
   async refreshToken(@Body() { refreshToken }: { refreshToken: string }) {

@@ -45,15 +45,15 @@ export class UserController {
   //   return this.userService.findOne(Number(id));
   // }
 
-  // @Put(':id')
-  // @UsePipes(new ValidationPipe({ transform: true }))
-  // async update(
-  //   @Param('id') id: string,
-  //   @Body() user: UpdateUserDto,
-  //   @Request() req,
-  // ): Promise<any> {
-  //   return this.userService.update(Number(id), user);
-  // }
+  @Put(':id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async update(
+    @Param('id') id: string,
+    @Body() employee: UpdateUserDto,
+    @Request() req,
+  ): Promise<{ message: string }> {
+    return this.userService.update(Number(id), req.user.profile, employee);
+  }
 
   // @Delete(':id')
   // @UsePipes(new ValidationPipe({ transform: true }))

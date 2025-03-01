@@ -39,13 +39,15 @@ export class EmployeesService {
     // Tenta salvar o novo funcionário
     const user = await this.employeesRepository.save(employee);
 
+    // Criar o usuário do colaborador
     const data = {
-      userId: user.id,
+      employeeId: user.id,
       profileId: 3,
     };
 
-    // Criar o usuário do colaborador
-    await this.usersService.create(data);
+    user.userId = (await this.usersService.create(data)).id;
+
+    await this.employeesRepository.update(user.id, { userId: user.userId });
 
     return { message: 'Colaborador cadastrado com sucesso' };
   }
@@ -62,7 +64,10 @@ export class EmployeesService {
 
   // Buscar um employee por CPF
   async findOneByCpf(cpf: string): Promise<EmployeeEntity | null> {
-    return await this.employeesRepository.findOne({ where: { cpf: cpf } });
+    return await this.employeesRepository.findOne({
+      where: { cpf: cpf },
+      relations: ['user', 'user.profile'],
+    });
   }
 
   // Atualizar um employee

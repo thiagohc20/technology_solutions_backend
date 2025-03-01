@@ -6,8 +6,7 @@ import { UserService } from 'src/modules/users/users.service';
 import { EmployeesService } from '../employees/employees.service';
 import { compareSync } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { UserEntity } from '../users/users.entity';
-
+import { EmployeeEntity } from '../employees/entity/employee.entity';
 interface GenerateTokensOptions {
   accessTokenExp?: number;
   refreshTokenExp?: number;
@@ -27,42 +26,48 @@ export class AuthService {
     )!;
   }
 
-  async signIn(cpf: string, password: string): Promise<any> {
+  async signIn(
+    cpf: string,
+    password: string,
+  ): Promise<{ accessToken: string; refreshToken: string; expiresIn: number }> {
     const user = await this.employeeService.findOneByCpf(cpf);
 
-    // if (!password || !user?.password) {
-    //   throw new UnauthorizedException('Você não tem acesso a aplicação');
-    // }
-
-    // if (!user || !compareSync(password, user.password)) {
-    //   throw new UnauthorizedException('Credenciais inválidas');
-    // }
-    // return this.generateTokens(user);
-    console.log(user);
+    if (!password || !user?.user.password) {
+      throw new UnauthorizedException('Você não tem acesso a aplicação');
+    }
+    if (!user || !compareSync(password, user.user.password)) {
+      throw new UnauthorizedException('Credenciais inválidas');
+    }
+    const token = this.generateTokens(user);
+    console.log(token);
+    return token;
   }
 
-  // private generateTokens(user: UserEntity, options?: GenerateTokensOptions) {
-  //   const payload = {
-  //     sub: user.id,
-  //     email: user.email,
-  //     profile: user.profile,
-  //   };
-  //   const refreshTokenSecret =
-  //     this.configService.get<string>('JWT_REFRESH_SECRET');
-  //   const accessTokenExpiresIn = this.jwtExpirationTimeInSeconds;
-  //   const refreshTokenExpiresIn = this.configService.get<number>(
-  //     'JWT_REFRESH_EXPIRATION_TIME',
-  //   );
+  private generateTokens(
+    user: EmployeeEntity,
+    options?: GenerateTokensOptions,
+  ) {
+    const payload = {
+      sub: user.user.id,
+      email: user.email,
+      profile: user.user.profile,
+    };
+    const refreshTokenSecret =
+      this.configService.get<string>('JWT_REFRESH_SECRET');
+    const accessTokenExpiresIn = this.jwtExpirationTimeInSeconds;
+    const refreshTokenExpiresIn = this.configService.get<number>(
+      'JWT_REFRESH_EXPIRATION_TIME',
+    );
 
-  //   return {
-  //     accessToken: this.jwtService.sign(payload),
-  //     refreshToken: this.jwtService.sign(payload, {
-  //       secret: refreshTokenSecret,
-  //       expiresIn: refreshTokenExpiresIn,
-  //     }),
-  //     expiresIn: accessTokenExpiresIn,
-  //   };
-  // }
+    return {
+      accessToken: this.jwtService.sign(payload),
+      refreshToken: this.jwtService.sign(payload, {
+        secret: refreshTokenSecret,
+        expiresIn: refreshTokenExpiresIn,
+      }),
+      expiresIn: accessTokenExpiresIn,
+    };
+  }
 
   async refreshToken(refreshToken: string) {
     let refreshPayload: any;

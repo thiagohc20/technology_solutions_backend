@@ -10,7 +10,7 @@ import {
 
 export class CreateUserDto {
   @IsNumber({}, { message: 'O id deve ser um número' })
-  userId: number;
+  employeeId: number;
 
   @IsNumber({}, { message: 'O id deve ser um número' })
   profileId: number;
