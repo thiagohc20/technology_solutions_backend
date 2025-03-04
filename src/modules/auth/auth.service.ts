@@ -26,15 +26,19 @@ export class AuthService {
     cpf: string,
     password: string,
   ): Promise<{ accessToken: string; refreshToken: string; expiresIn: string }> {
-    const user = await this.employeeService.findOneByCpf(cpf);
+    const employee = await this.employeeService.findOneByCpf(cpf);
 
-    if (!password || !user?.user.password || user.user.profile.id == 3) {
+    if (!employee || !employee?.user) {
       throw new UnauthorizedException('Você não tem acesso a aplicação');
     }
-    if (!user || !compareSync(password, user.user.password)) {
+
+    const user = await this.userService.getUser(employee?.userId);
+
+    if (!employee || !compareSync(password, user?.password)) {
       throw new UnauthorizedException('Credenciais inválidas');
     }
-    const token = this.generateTokens(user);
+
+    const token = this.generateTokens(employee);
 
     return token;
   }
@@ -55,10 +59,6 @@ export class AuthService {
       'JWT_REFRESH_EXPIRATION_TIME',
     );
 
-    console.log(typeof this.configService.get<string>('JWT_EXPIRATION_TIME'));
-    console.log(
-      typeof this.configService.get<string>('JWT_REFRESH_EXPIRATION_TIME'),
-    );
     return {
       accessToken: this.jwtService.sign(payload),
       refreshToken: this.jwtService.sign(payload, {

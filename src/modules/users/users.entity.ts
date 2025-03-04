@@ -22,6 +22,10 @@ export class UserEntity {
   @Column({ type: 'nvarchar', unique: true })
   password?: string;
 
+  @Exclude()
+  @Column({ name: 'profile_id' })
+  profileId: number;
+
   @OneToOne(() => ProfileEntity)
   @JoinColumn({ name: 'profile_id' })
   profile: ProfileEntity;

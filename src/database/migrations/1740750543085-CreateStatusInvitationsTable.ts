@@ -13,6 +13,7 @@ export class CreateStatusInvitationsTable1740750543085
                 status_id INT NOT NULL,
                 created_at DATETIME NOT NULL,
                 updated_at DATETIME,       
+                expiration DATETIME NOT NULL,
                 FOREIGN KEY (status_id) REFERENCES status(id)
             )
             END

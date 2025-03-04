@@ -127,7 +127,7 @@ export class EmployeesService {
   async findOneByCpf(cpf: string): Promise<EmployeeEntity | null> {
     const employee = await this.employeesRepository.findOne({
       where: { cpf: cpf },
-      relations: ['user.profile'],
+      relations: ['user.profile', 'user'],
     });
     if (!employee) {
       throw new HttpException('Colaborador não encontrado', 404);

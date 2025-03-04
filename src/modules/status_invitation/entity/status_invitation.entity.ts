@@ -21,13 +21,17 @@ export class StatusInvitationEntity {
   @Expose()
   statusId: number;
 
-  @CreateDateColumn() // Este campo será automaticamente preenchido com a data e hora de criação
+  @CreateDateColumn()
   @Exclude()
   created_at: Date;
 
-  @CreateDateColumn() // Este campo será automaticamente preenchido com a data e hora de criação
+  @CreateDateColumn()
   @Exclude()
   updated_at: Date;
+
+  @CreateDateColumn()
+  @Exclude()
+  expiration: Date;
 
   // @OneToOne(() => UserEntity)
   // @JoinColumn({ name: 'user_id' })

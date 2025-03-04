@@ -10,10 +10,10 @@ import {
 } from 'class-validator';
 
 export class UpdateUserDto {
-  @IsNumber({}, { message: 'O id deve ser um número' })
+  @IsNumber({}, { message: 'O id do colaborador deve ser um número' })
   employeeId: number;
 
-  @IsNumber({}, { message: 'O id deve ser um número' })
+  @IsNumber({}, { message: 'O id do perfildeve ser um número' })
   profileId: number;
 
   @IsString({ message: 'A senha deve ser uma string válida' })

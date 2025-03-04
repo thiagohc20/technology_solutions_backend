@@ -59,6 +59,24 @@ export class UserService {
     return { message: 'Usuário criado com sucesso!', id: userCreated.id };
   }
 
+  async getUser(id: number): Promise<UserEntity | null> {
+    return await this.userRepository.findOne({ where: { id: id } });
+  }
+
+  async getUsersLength(): Promise<any> {
+    const manager = 3;
+    const pd = 5;
+    const employeeNormal = 6;
+
+    const length = {
+      manager,
+      pd,
+      employeeNormal,
+    };
+
+    return length;
+  }
+
   async update(
     id: number,
     user: ProfileEntity,
@@ -99,12 +117,21 @@ export class UserService {
       throw new HttpException('Perfil não encontrado', 500);
     }
 
-    const newUser = this.userRepository.create({
-      employee: hasEmployee,
-      password: employee.password,
-      updated_at: new Date(),
-      profile: existingProfile,
-    });
+    let newUser;
+    if (employee.profileId != 3) {
+      newUser = this.userRepository.create({
+        employee: hasEmployee,
+        password: employee.password,
+        updated_at: new Date(),
+        profile: existingProfile,
+      });
+    } else {
+      newUser = this.userRepository.create({
+        employee: hasEmployee,
+        updated_at: new Date(),
+        profile: existingProfile,
+      });
+    }
 
     await this.userRepository.update(id, newUser);
 

@@ -1,5 +1,5 @@
 import { Injectable, HttpException } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Repository, LessThan } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { CreateStatusInvitationDto } from 'src/modules/status_invitation/dto/create-status-invitation.dto';
@@ -24,6 +24,9 @@ export class StatusInvitationService {
     const data = {
       ...invitation,
       created_at: new Date(),
+      expiration: new Date(
+        new Date().getTime() + 24 * 60 * 60 * 1000,
+      ).toDateString(),
     };
 
     const statusInvitation = this.statusInvitationRepository.create(data);
@@ -45,5 +48,23 @@ export class StatusInvitationService {
       updated_at: new Date(),
     };
     await this.statusInvitationRepository.update(invitation.id, date);
+  }
+
+  async updateExpiredStatus() {
+    const currentDate = new Date();
+
+    const expiredStatuses = await this.statusInvitationRepository.find({
+      where: {
+        expiration: LessThan(currentDate),
+        statusId: 2,
+      },
+    });
+
+    for (const status of expiredStatuses) {
+      status.statusId = 3;
+      await this.statusInvitationRepository.save(status);
+    }
+
+    return { message: `${expiredStatuses.length} status(s) atualizado(s)` };
   }
 }
