@@ -1,15 +1,43 @@
+version: '3.8'
+
 services:
+  nestjs-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NODE_ENV: dev # Passando a variável de ambiente para o Dockerfile
+    ports:
+      - '3000:3000' # Mapeia a porta 3000 do contêiner para a porta 3000 da máquina local
+    environment:
+      NODE_ENV: ${NODE_ENV} # Acessando a variável NODE_ENV do sistema ou do .env
+    volumes:
+      - .:/usr/src/app # Monta o diretório do código-fonte no contêiner (hot reload)
+      - /usr/src/app/node_modules # Previene que a pasta node_modules seja sobrescrita
+    networks:
+      - nestjs-network
+    command: npm run start:dev
+    depends_on:
+      - mssql
+
   mssql:
     container_name: sql-server
     image: mcr.microsoft.com/mssql/server:2019-latest
     restart: always
     environment:
       ACCEPT_EULA: 'Y'
-      SA_PASSWORD: 'YourStrong!Passw0rd' # Aqui você define a senha
+      SA_PASSWORD: 'YourStrong!Passw0rd'
     ports:
-      - 1433:1433
+      - '1433:1433'
     volumes:
-      - my-volume:/var/opt/mssql
+      - my-volume:/var/opt/mssql # Definindo o volume persistente para o banco de dados
+    networks:
+      - nestjs-network
 
+networks:
+  nestjs-network:
+    driver: bridge
+
+# Definindo o volume "my-volume" para persistência de dados
 volumes:
   my-volume:

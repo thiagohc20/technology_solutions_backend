@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
 import { UserService } from 'src/modules/users/users.service';
 import { EmployeesService } from '../employees/employees.service';
-import { compareSync } from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { EmployeeEntity } from '../employees/entity/employee.entity';
 interface GenerateTokensOptions {
@@ -34,7 +34,7 @@ export class AuthService {
 
     const user = await this.userService.getUser(employee?.userId);
 
-    if (!employee || !compareSync(password, user?.password)) {
+    if (!employee || !bcrypt.compareSync(password, user?.password!)) {
       throw new UnauthorizedException('Credenciais inválidas');
     }
 

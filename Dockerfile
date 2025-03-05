@@ -1,43 +1,30 @@
-FROM node:18.17.1-alpine3.18 AS build
+# Use uma imagem base oficial do Node.js
+FROM node:20
 
+# Cria e define o diretório de trabalho no contêiner
 WORKDIR /usr/src/app
 
-# Copy files
-COPY ./src ./src
-COPY ./package.json .
-COPY ./package-lock.json .
-COPY ./tsconfig.json .
-COPY ./tsconfig.build.json .
-COPY ./nest-cli.json .
+# Define a variável de ambiente NODE_ENV, pode ser passado via Docker Compose ou durante o build
+ARG NODE_ENV=dev
+ENV NODE_ENV=$NODE_ENV
 
-# Install dependencies
-RUN npm install
-RUN npm run build --prod
+# Copia o package.json e package-lock.json (ou yarn.lock) para o contêiner
+COPY package*.json ./
 
-ENV NODE_ENV production
+# Instala todas as dependências (incluindo as de dev)
+RUN npm install --force
 
-# PROD STAGE
-FROM node:18.17.1-alpine3.18 AS prod
+# Instala as dependências do TypeScript
+RUN npm install -g typescript ts-node --force
 
-WORKDIR /usr/src/app
+# Copia o arquivo .env para o contêiner
+COPY .env ./.env
 
-# Copy src folder
-COPY --from=build /usr/src/app/src ./src
-COPY --from=build /usr/src/app/dist ./dist
-COPY --from=build /usr/src/app/tsconfig.json .
+# Copia todo o código-fonte para o contêiner
+COPY . .
 
-# Copy package.json and package-lock.json
-COPY --from=build /usr/src/app/package.json ./package.json
-COPY --from=build /usr/src/app/package-lock.json ./package-lock.json
-
-RUN npm i dotenv
-RUN npm i typeorm
-RUN npm i
-
-# Update packages
-RUN apk upgrade
-
+# Expõe a porta que o app vai rodar
 EXPOSE 3000
 
-# CMD ["sh", "-c", "npm run migration:run && node dist/main"]
-CMD ["sh", "-c", "node dist/main"]
+# Comando para rodar o NestJS em modo de desenvolvimento (com hot reload)
+CMD ["npm", "run", "start:dev"]
