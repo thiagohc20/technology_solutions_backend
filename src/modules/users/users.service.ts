@@ -9,7 +9,7 @@ import { Repository } from 'typeorm';
 
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { instanceToPlain } from 'class-transformer';
 /* entities */
 import { UserEntity } from './users.entity';

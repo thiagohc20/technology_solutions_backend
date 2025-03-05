@@ -29,10 +29,16 @@ git clone https://github.com/seu-usuario/seu-repositorio.git
 docker-compose up --build
 ```
 
-# Caso a imagem do backend nao execute
+# Caso a imagem do backend nao execute, mude a env para DB_HOST:localhost
 
 ```bash
 npm i
+```
+
+# docker-compose up -d
+
+```bash
+docker-compose up -d
 ```
 
 # Logo após
