@@ -15,9 +15,28 @@ Antes de começar, certifique-se de ter o seguinte instalado no seu sistema:
 ```bash
 node -v
 npm -v
+```
 
 # Primeiro, clone o repositório para o seu computador:
-# git clone https://github.com/seu-usuario/seu-repositorio.git
-# execute o comando docker-compose up --build
-# caso de falha, execute o npm i e depois ng s
+
+```bash
+git clone https://github.com/seu-usuario/seu-repositorio.git
+```
+
+# execute o comando
+
+```bash
+docker-compose up --build
+```
+
+# Caso a imagem do backend nao execute
+
+```bash
+npm i
+```
+
+# Logo após
+
+```bash
+npm run start:dev
 ```
