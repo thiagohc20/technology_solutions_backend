@@ -21,6 +21,8 @@ npm -v
 
 ```bash
 git clone https://github.com/thiagohc20/technology_solutions_backend.git
+
+npm i @nestjs/cli
 ```
 
 # execute o comando
