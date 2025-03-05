@@ -21,7 +21,7 @@ services:
       - mssql
 
   mssql:
-    container_name: sql-server
+    container_name: localhost
     image: mcr.microsoft.com/mssql/server:2019-latest
     restart: always
     environment:
